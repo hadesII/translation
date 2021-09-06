@@ -13,24 +13,22 @@ if __name__ == '__main__':
     ENC_EMB_DIM = 256
     DEC_EMB_DIM = 256
     HID_DIM = 512
-    N_LAYERS = 2
-    DNC_DROPOUT = 0.5
-    ENC_DROPOUT = 0.5
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     batch = 128
     n_epochs = 10
     CLIP = 1
+    dropout = 0.5
     train_iter,valid_iter,_ = iterator(batch,device)
 
 
 
-    enc = Encoder(INPUT_DIM,ENC_EMB_DIM,HID_DIM,N_LAYERS,ENC_DROPOUT)
-    dec = Decoder(OUTPUT_DIM,DEC_EMB_DIM,HID_DIM,N_LAYERS,DNC_DROPOUT)
+    enc = Encoder(INPUT_DIM,ENC_EMB_DIM,HID_DIM,dropout)
+    dec = Decoder(OUTPUT_DIM,DEC_EMB_DIM,HID_DIM,dropout)
 
     model = Seq2Seq(enc,dec,device).to(device)
     model.apply(init_weights)
-    if os.path.exists("tut1-model.pt"):
-        model.load_state_dict(torch.load("tut1-model.pt"))
+    if os.path.exists("tut2-model.pt"):
+        model.load_state_dict(torch.load("tut2-model.pt"))
     count_parameters(model)
 
     pad_idx = TGT.vocab.stoi[TGT.pad_token]
@@ -49,7 +47,7 @@ if __name__ == '__main__':
         epoch_min,epoch_sec = epoch_time(start_time,end_time)
         if valid_loss < best_valid_loss:
             best_valid_loss = valid_loss
-            torch.save(model.state_dict(),"tut1-model.pt")
+            torch.save(model.state_dict(),"tut2-model.pt")
 
         print(f"Epoch:{epoch+1:02} | Time: {epoch_min}m {epoch_sec}s")
         print(f'\tTrain Loss: {train_loss:.3f} | Train PPL: {math.exp(train_loss):7.3f}')
