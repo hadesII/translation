@@ -40,8 +40,10 @@ def evaluate(model,iterator,criterion):
 
 def init_weights(m):
     for name,param in m.named_parameters():
-        torch.nn.init.uniform_(param.data,-0.8,0.8)
-
+        if "weight" in name:
+            torch.nn.init.normal_(param.data,mean=0,std=0.01)
+        else:
+            torch.nn.init.constant_(param.data,0)
 def count_parameters(model):
     p = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"The model has {p} trainable parameters")

@@ -5,7 +5,7 @@ import torch
 from trainer import count_parameters,epoch_time,train,evaluate,init_weights
 
 from data import SRC,TGT,iterator
-from model import Encoder,Decoder,Seq2Seq
+from model import Encoder,Decoder,Seq2Seq,Attention
 
 if __name__ == '__main__':
     INPUT_DIM = len(SRC.vocab)
@@ -22,18 +22,19 @@ if __name__ == '__main__':
 
 
 
-    enc = Encoder(INPUT_DIM,ENC_EMB_DIM,HID_DIM,dropout)
-    dec = Decoder(OUTPUT_DIM,DEC_EMB_DIM,HID_DIM,dropout)
+    enc = Encoder(INPUT_DIM,ENC_EMB_DIM,HID_DIM,HID_DIM,dropout)
+    dec = Decoder(OUTPUT_DIM,DEC_EMB_DIM,HID_DIM,HID_DIM,dropout)
+    atten = Attention(HID_DIM,HID_DIM)
 
-    model = Seq2Seq(enc,dec,device).to(device)
+    model = Seq2Seq(enc,dec,atten,device).to(device)
     model.apply(init_weights)
-    if os.path.exists("tut2-model.pt"):
-        model.load_state_dict(torch.load("tut2-model.pt"))
+    if os.path.exists("tut3-model.pt"):
+        model.load_state_dict(torch.load("tut3-model.pt"))
     count_parameters(model)
 
     pad_idx = TGT.vocab.stoi[TGT.pad_token]
     criterion = torch.nn.CrossEntropyLoss(ignore_index=pad_idx)
-    optimizer = torch.optim.Adam(model.parameters(),lr=0.01)
+    optimizer = torch.optim.Adam(model.parameters())
 
     best_valid_loss = float("inf")
     for epoch in range(n_epochs):
@@ -47,7 +48,7 @@ if __name__ == '__main__':
         epoch_min,epoch_sec = epoch_time(start_time,end_time)
         if valid_loss < best_valid_loss:
             best_valid_loss = valid_loss
-            torch.save(model.state_dict(),"tut2-model.pt")
+            torch.save(model.state_dict(),"tut3-model.pt")
 
         print(f"Epoch:{epoch+1:02} | Time: {epoch_min}m {epoch_sec}s")
         print(f'\tTrain Loss: {train_loss:.3f} | Train PPL: {math.exp(train_loss):7.3f}')
