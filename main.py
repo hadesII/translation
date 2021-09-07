@@ -21,15 +21,15 @@ if __name__ == '__main__':
     train_iter,valid_iter,_ = iterator(batch,device)
 
 
-
-    enc = Encoder(INPUT_DIM,ENC_EMB_DIM,HID_DIM,HID_DIM,dropout)
-    dec = Decoder(OUTPUT_DIM,DEC_EMB_DIM,HID_DIM,HID_DIM,dropout)
+    src_pad_id = SRC.vocab.stoi[SRC.pad_token]
     atten = Attention(HID_DIM,HID_DIM)
+    enc = Encoder(INPUT_DIM,ENC_EMB_DIM,HID_DIM,HID_DIM,dropout)
+    dec = Decoder(OUTPUT_DIM,atten,DEC_EMB_DIM,HID_DIM,HID_DIM,dropout)
 
-    model = Seq2Seq(enc,dec,atten,device).to(device)
+    model = Seq2Seq(enc,dec,src_pad_id,device).to(device)
     model.apply(init_weights)
-    if os.path.exists("tut3-model.pt"):
-        model.load_state_dict(torch.load("tut3-model.pt"))
+    if os.path.exists("tut4-model.pt"):
+        model.load_state_dict(torch.load("tut4-model.pt"))
     count_parameters(model)
 
     pad_idx = TGT.vocab.stoi[TGT.pad_token]
@@ -48,7 +48,7 @@ if __name__ == '__main__':
         epoch_min,epoch_sec = epoch_time(start_time,end_time)
         if valid_loss < best_valid_loss:
             best_valid_loss = valid_loss
-            torch.save(model.state_dict(),"tut3-model.pt")
+            torch.save(model.state_dict(),"tut4-model.pt")
 
         print(f"Epoch:{epoch+1:02} | Time: {epoch_min}m {epoch_sec}s")
         print(f'\tTrain Loss: {train_loss:.3f} | Train PPL: {math.exp(train_loss):7.3f}')

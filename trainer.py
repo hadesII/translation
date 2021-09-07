@@ -5,10 +5,10 @@ def train(model,iterator,optimizer,criterion,clip):
     epoch_loss = 0
 
     for i,batch in enumerate(iterator):
-        src = batch.src
+        src, src_len= batch.src
         trg = batch.trg
         optimizer.zero_grad()
-        output = model(src,trg)
+        output = model(src,src_len,trg)
         output_dim = output.shape[-1]
         output = output[1:].view(-1,output_dim)
         trg = trg[1:].view(-1)
@@ -26,10 +26,10 @@ def evaluate(model,iterator,criterion):
 
     with torch.no_grad():
         for i, batch in enumerate(iterator):
-            src = batch.src
+            src, srclen= batch.src
             trg = batch.trg
 
-            output = model(src,trg,0)
+            output = model(src,srclen,trg,0)
             output_dim = output.shape[-1]
             output = output[1:].view(-1,output_dim)
             trg = trg[1:].view(-1)
